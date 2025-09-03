@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mario Remix</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #222;
+        }
+        canvas {
+            border: 2px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <main></main>
+    <script>
+        // Variables globales
+        let player;
+        let serialData;
+
+        // Configuración inicial
+        function setup() {
+            createCanvas(800, 400);
+            player = {
+                x: 100,
+                y: 300,
+                speed: 5,
+                jumpForce: -12,
+                gravity: 0.6,
+                velocity: 0,
+                isJumping: false,
+                isCrouching: false,
+                isRunning: false
+            };
+            
+            // Simular datos seriales iniciales
+            serialData = {
+                accelX: 0,
+                accelY: 0,
+                accelZ: 0,
+                sw1: 0,
+                sw2: 0,
+                sw3: 0,
+                sw4: 0
+            };
+        }
+
+        // Bucle principal
+        function draw() {
+            // Fondo y suelo
+            background(220);
+            line(0, 330, width, 330);
+
+            // Actualizar físicas
+            updatePlayer();
+            
+            // Dibujar jugador
+            drawPlayer();
+        }
+
+        // Actualizar estado del jugador
+        function updatePlayer() {
+            // Movimiento horizontal basado en acelerómetro
+            if (serialData.accelX < -100) {
+                player.x -= player.speed * (serialData.sw3 ? 1.5 : 1);
+            }
+            if (serialData.accelX > 100) {
+                player.x += player.speed * (serialData.sw3 ? 1.5 : 1);
+            }
+
+            // Salto (Switch 1)
+            if (serialData.sw1 && !player.isJumping) {
+                player.velocity = player.jumpForce;
+                player.isJumping = true;
+            }
+
+            // Aplicar gravedad
+            player.velocity += player.gravity;
+            player.y += player.velocity;
+
+            // Colisión con suelo
+            if (player.y > 300) {
+                player.y = 300;
+                player.velocity = 0;
+                player.isJumping = false;
+            }
+
+            // Estados
+            player.isCrouching = serialData.sw2;
+            player.isRunning = serialData.sw3;
+
+            // Límites de pantalla
+            player.x = constrain(player.x, 0, width - 30);
+        }
+
+        // Dibujar jugador
+        function drawPlayer() {
+            push();
+            fill(255, 0, 0);
+            if (player.isCrouching) {
+                rect(player.x, player.y - 15, 30, 30);
+            } else {
+                rect(player.x, player.y - 30, 30, 60);
+            }
+            pop();
+        }
+
+        // Para desarrollo: simular datos seriales con teclado
+        function keyPressed() {
+            if (keyCode === LEFT_ARROW) serialData.accelX = -500;
+            if (keyCode === RIGHT_ARROW) serialData.accelX = 500;
+            if (key === ' ') serialData.sw1 = 1;
+            if (key === 'X') serialData.sw2 = 1;
+            if (key === 'Z') serialData.sw3 = 1;
+        }
+
+        function keyReleased() {
+            if (keyCode === LEFT_ARROW || keyCode === RIGHT_ARROW) serialData.accelX = 0;
+            if (key === ' ') serialData.sw1 = 0;
+            if (key === 'X') serialData.sw2 = 0;
+            if (key === 'Z') serialData.sw3 = 0;
+        }
+    </script>
+</body>
+</html>
