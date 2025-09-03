@@ -1,84 +1,57 @@
 # Ruta de Desarrollo - Mario Remix (Versión Simple)
 
-## Objetivo
-Desarrollar una versión simplificada pero funcional de Mario Remix utilizando tecnologías web básicas.
-
-## Fases de Desarrollo
-
-### Fase 1: Configuración Inicial (1 semana)
-- [x] Crear repositorio del proyecto
-- [ ] Configurar entorno básico
-  - HTML5 Canvas para el juego
-  - Archivos JavaScript básicos
-  - CSS para estilos simples
-  - Estructura de carpetas del proyecto
-
-### Fase 2: Mecánicas Básicas (2 semanas)
-1. Implementación del personaje
-   - Dibujo básico del personaje (rectángulo/sprite simple)
-   - Movimiento izquierda/derecha
-   - Salto básico
-   - Gravedad simple
-
-2. Creación del nivel básico
-   - Plataformas simples (rectángulos)
-   - Detección de colisiones básica
-   - Fondo estático
-
-### Fase 3: Elementos del Juego (2 semanas)
-1. Elementos básicos
-   - Monedas simples para recolectar
-   - Obstáculos básicos
-   - Enemigos simples (movimiento horizontal)
-
-2. Sistema de juego básico
-   - Contador de puntos
-   - Vidas (3 intentos)
-   - Pantalla de inicio y fin
-
-### Fase 4: Mejoras y Pulido (1 semana)
-1. Mejoras visuales simples
-   - Sprites básicos
-   - Colores definidos
-   - Mensajes al jugador
-
-2. Audio básico
-   - Efecto de salto
-   - Efecto de moneda
-   - Música de fondo simple
-
-## Tecnologías a Utilizar
-- HTML5
-- JavaScript vanilla (sin frameworks complejos)
-- CSS básico
-- Canvas para el renderizado
-- Sprites simples (imágenes PNG)
-- Arduino Esplora
-- Comunicación Serial Web (Web Serial API)
+## Stack Tecnológico
+- HTML5 
+- CSS3
+- JavaScript (ES6+)
+- p5.js para renderizado y lógica de juego
+- p5.serialport para comunicación con Arduino
 
 ## Integración con Arduino Esplora
-1. Configuración del Hardware
-   - Programación básica del Arduino Esplora
-   - Configuración de la cruz direccional
-   - Configuración de los 4 switches
-   - Lectura de entradas digitales
+1. Lectura de Sensores
+   - Acelerómetro (X, Y, Z)
+     * X: Control movimiento horizontal (-1023 a 1023)
+     * Y: Control de velocidad
+     * Z: No utilizado
+   - Cruz direccional (alternativa al acelerómetro)
+     * LEFT: Movimiento izquierda
+     * RIGHT: Movimiento derecha
+   - Sensor de luz (control ambiental)
+   - Temperatura (efectos visuales)
+   - Slider (control de volumen)
+   - Micrófono (efectos especiales)
+   - 4 switches (acciones del personaje)
 
-2. Comunicación Web-Arduino
-   - Implementación de Web Serial API
-   - Protocolo de comunicación simple
-   - Mapeo de controles:
-     * Cruz direccional: Movimiento izquierda/derecha
+2. Comunicación Serial
+   - Puerto serie: /dev/ttyACM0 (Linux)
+   - Velocidad: 9600 baudios
+   - Formato de datos: CSV
+   - Estructura: `accelX,accelY,accelZ,light,temp,slider,mic,sw1,sw2,sw3,sw4`
+
+// ...existing code...
+
+3. Comunicación Web-Arduino
+   - Implementación de p5.serialport para Web
+   - Protocolo de comunicación CSV
+   - Estructura de datos serial:
+     ```text
+     accelX,accelY,accelZ,button1,button2,button3,button4
+     ```
+   - Mapeo de controles desde datos seriales:
+     * Acelerómetro X: Movimiento izquierda/derecha (inclinación)
+     * Acelerómetro Y: Control de velocidad
      * Switch 1: Salto
      * Switch 2: Agacharse
      * Switch 3: Correr
      * Switch 4: Pausa
 
-3. Características del Control
-   - Respuesta inmediata a las pulsaciones
-   - Detección de múltiples botones simultáneos
-   - Estado de pausa
+   - Rangos de control:
+     * Acelerómetro X: -1023 a 1023
+       - < -100: Movimiento izquierda
+       - > 100: Movimiento derecha
+       - Entre -100 y 100: Personaje quieto
 
-## Estructura de Archivos
+## Estructura de Archivos Simplificada
 ```
 mario-remix/
 │
@@ -88,39 +61,39 @@ mario-remix/
 ├── js/
 │   ├── game.js
 │   ├── player.js
-│   ├── levels.js
-│   └── arduino-controller.js
-├── arduino/
-│   └── mario_controller.ino
+│   └── serial-handler.js
 ├── assets/
 │   ├── images/
 │   └── sounds/
 └── README.md
 ```
 
-## Funcionalidades Mínimas
-1. Movimiento del personaje (izquierda, derecha, salto)
-2. Plataformas para saltar
-3. Colección de monedas
-4. Sistema de puntuación
-5. Condición de victoria/derrota
-
-## Controles
-### Controles Arduino Esplora
-- Cruz direccional: Mover izquierda/derecha
-- Switch 1: Saltar
-- Switch 2: Agacharse
-- Switch 3: Correr
-- Switch 4: Pausar juego
-
-## Siguientes Pasos
-1. Crear estructura básica de archivos
-2. Implementar el canvas y el loop principal del juego
-3. Agregar movimiento básico del personaje
-4. Desarrollar sistema de colisiones simple
-
 ## Notas Técnicas
-- Usar requestAnimationFrame para el loop del juego
-- Mantener la física simple (gravedad básica)
-- Utilizar objetos JavaScript simples para la lógica del juego
-- Priorizar la funcionalidad sobre la estética en esta primera versión
+- Usar p5.js para el loop del juego y renderizado
+- Física simple basada en gravedad básica
+- Comunicación serial directa mediante p5.serialport
+- Sin necesidad de servidor backend
+- Requisitos mínimos:
+  * Navegador moderno con soporte WebSerial
+  * Drivers Arduino instalados
+  * p5.js y p5.serialport
+
+## Ejemplo de Implementación Base
+```html
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script src="path/to/p5.serialport.js"></script>
+    <script src="js/serial-handler.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/player.js"></script>
+</head>
+<body>
+    <main></main>
+</body>
+</html>
+```
+
+// ...resto del código existente...
